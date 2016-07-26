@@ -1,24 +1,20 @@
 /* jshint node: true */
 'use strict';
-var notifier = require('node-notifier');
+var BasePlugin = require('ember-cli-deploy-plugin');
+var notify = require('./lib/notify');
 
 module.exports = {
   name: 'ember-cli-deploy-notifier',
   createDeployPlugin: function(options) {
-    return {
-      name: options.name,
+    var options = {name: options.name};
+    var plugins = ['willDeploy', 'willBuild', 'build', 'didBuild', 'willPrepare', 'prepare', 'didPrepare', 'willUpload', 'upload', 'didUpload', 'willActivate', 'activate', 'fetchRevisions', 'didActivate', 'fetchRevisions', 'didDeploy', 'teardown'];
+    
+    plugins.forEach(function(p) {
+      options[p] = notify(p);
+    });
+    
+    var DeployPlugin = BasePlugin.extend(options);
 
-      didBuild: function(context) {
-        //do something amazing here once the project has been built
-      },
-
-      upload: function(context) {
-        //do something here to actually deploy your app somewhere
-      },
-
-      didDeploy: function(context) {
-        //do something here like notify your team on slack
-      }
-    };
+    return new DeployPlugin();
   }
 };
